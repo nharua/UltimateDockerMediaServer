@@ -1,53 +1,54 @@
 # 🎬 Ultimate Docker Media Server (UDMS)
 
-**Ultimate Docker Media Server** là một dự án homelab cho phép bạn tự triển khai hệ thống media server tại nhà bằng Docker Compose. Hệ thống bao gồm đầy đủ các thành phần quản lý, theo dõi, phát và tải nội dung số — tất cả đều được quản lý qua các container độc lập, dễ mở rộng và bảo trì.
+**Ultimate Docker Media Server** is a homelab project that allows you to deploy your own media server system at home using Docker Compose. The system includes complete components for managing, monitoring, streaming, and downloading digital content — all managed through independent containers that are easy to scale and maintain.
+This project is based on the [Docker Media Server](https://www.simplehomelab.com/docker-media-server-2024/) project, with the goal of simplifying the deployment process and providing a standardized folder structure for easy management.
 
 ---
 
-## 🚀 Mục tiêu của dự án
+## 🚀 Project Goals
 
-- Đơn giản hóa việc triển khai media server với một script duy nhất
-- Cấu trúc folder rõ ràng, chuẩn hóa
-- Dễ dàng tích hợp và thêm các dịch vụ khác
-- Phù hợp cho cá nhân, gia đình hoặc homelab
+- Simplify media server deployment with a single script
+- Clear, standardized folder structure
+- Easy integration and addition of other services
+- Suitable for individuals, families, or homelab environments
 
 ---
 
-## 🧩 Thành phần hệ thống
+## 🧩 System Components
 
 **1. Core Services**
-| Service       | Mô tả                         |
+| Service       | Description                   |
 |---------------|-------------------------------|
-| `socket-proxy`| Reverse proxy bảo mật cho Docker socket |
-| `portainer`   | Giao diện quản lý container Docker |
-| `dozzle`      | Theo dõi logs các container theo thời gian thực |
-| `homepage`    | Trang dashboard hiển thị toàn bộ dịch vụ |
+| `socket-proxy`| Secure reverse proxy for Docker socket |
+| `portainer`   | Docker container management interface |
+| `dozzle`      | Real-time container log monitoring |
+| `homepage`    | Dashboard displaying all services |
 
 **2. Media Services**
-| Service   | Mô tả             |
-|-----------|-------------------|
-| `jellyfin`| Media server mã nguồn mở, stream phim/nhạc |
+| Service   | Description           |
+|-----------|-----------------------|
+| `jellyfin`| Open-source media server for streaming movies/music |
 
 **3. Downloader Services**
-| Service       | Mô tả                            |
+| Service       | Description                      |
 |---------------|----------------------------------|
-| `qbittorrent` | Trình tải torrent có giao diện web |
+| `qbittorrent` | Torrent client with web interface |
 
 ---
 
-## 📁 Cấu trúc thư mục (sau khi chạy `init_udms.sh`)
+## 📁 Directory Structure (after running `init_udms.sh`)
 ```yaml
 DOCKERDIR/
 ├── appdata/
 │ └── jellyfin/
 ├── compose/
 │ └── udms/
-│ ├── socket-proxy.yml
-│ ├── portainer.yml
-│ ├── dozzle.yml
-│ ├── homepage.yml
-│ ├── jellyfin.yml
-│ └── qbittorrent.yml
+│   ├── socket-proxy.yml
+│   ├── portainer.yml
+│   ├── dozzle.yml
+│   ├── homepage.yml
+│   ├── jellyfin.yml
+│   └── qbittorrent.yml
 ├── logs/
 ├── scripts/
 ├── secrets/
@@ -66,33 +67,71 @@ DATADIR/
 └── ...
 ```
 
-## 🛠️ Yêu cầu hệ thống
+## 🛠️ System Requirements
 
-- **Hệ điều hành**: Linux
-- **RAM**: ≥ 4GB (khuyến nghị ≥ 8GB nếu dùng transcoding)
-- **Phần mềm**: `docker`, `docker-compose`, `setfacl`, `bash`
-- **Quyền**: Tài khoản có quyền `sudo`
+- **Operating System**: Linux
+- **RAM**: ≥ 4GB (recommended ≥ 8GB if using transcoding)
+- **Software**: `docker`, `docker-compose`, `setfacl`, `bash`
+- **Permissions**: Account with `sudo` privileges
 
 ---
 
-## 📦 Cài đặt & Triển khai
+## 📦 Installation & Deployment
 
-### Bước 1: Clone repo
+### Step 1: Clone the repository
 ```bash
-git clone <repo_url>
+git clone https://github.com/nharua/UltimateDockerMediaServer.git
 cd UltimateDockerMediaServer
 ```
-### Bước 2: Cấp quyền thực thi cho script
+
+### Step 2: Grant execution permissions to the script
 ```bash
 chmod +x init_udms.sh
 ```
-### Bước 3: Chạy script khởi tạo
+
+### Step 3: Run the initialization script
 ```bash
 ./init_udms.sh
 ```
-### Bước 4: Chạy Docker Compose
+
+### Step 4: Run Docker Compose
 ```bash
 cd $DOCKERDIR
 sudo docker-compose -f docker-compose-udms.yml up -d
+```
+
+---
+## 🌐 Accessing Your Services
+
+After deployment, you can access your media server and management interfaces using the following default URLs (replace `localhost` with your server's IP if accessing remotely):
+
+- **Jellyfin**: [http://localhost:8096](http://localhost:8096)
+- **Portainer**: [http://localhost:9000](http://localhost:9000)
+- **Dozzle**: [http://localhost:8082](http://localhost:8082)
+- **Homepage Dashboard**: [http://localhost:3000](http://localhost:3000)
+- **qBittorrent Web UI**: [http://localhost:8081](http://localhost:8081)
+
+> Default ports can be changed in the respective compose YAML files under `compose/udms/`.
+
+---
+## ❓ Troubleshooting & FAQ
+
+- **Permission Errors**: Ensure your user has `sudo` privileges and that Docker is installed correctly.
+- **Port Conflicts**: If a service fails to start, check if the required port is already in use and adjust the port mapping in the relevant YAML file.
+- **Directory Issues**: Make sure the `DOCKERDIR` and `DATADIR` directories exist and have the correct permissions.
+- **Environment Variables**: Verify that the `.env` file is present and properly configured.
+- **Service Not Accessible**: Check Docker container logs using `sudo docker ps` and `sudo docker logs <container_name>` for error messages.
+
+For more help, please open an issue on the project's GitHub page.
+
+---
+## 📄 License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+---
+## 🤝 Contributions
+
+Contributions are welcome! Please open issues or submit pull requests via GitHub. For major changes, open an issue first to discuss what you would like to change.
 ```
 
