@@ -1,0 +1,32 @@
+services:
+  filebrowser:
+    image: filebrowser/filebrowser:s6
+    container_name: filebrowser
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    # profiles: ["apps", "all"]
+    networks:
+      - default
+    ports:
+      - "8080:80"  # Sử dụng port 8080 thay vì 81
+    volumes:
+      - $DOCKERDIR/appdata/filebrowser:/config
+      - $USERDIR:/data/home
+      - $DATADIR/media:/data/media
+      - $DATADIR/torrents:/data/torrents
+      - $DATADIR/usenet:/data/usenet
+    environment:
+      TZ: $TZ
+      PUID: $PUID
+      PGID: $PGID
+    entrypoint: >
+      sh -c "
+        if [ ! -f /config/filebrowser.db ]; then
+          echo '⚙️ Khởi tạo File Browser DB...';
+          filebrowser -d /config/filebrowser.db config init &&
+          filebrowser -d /config/filebrowser.db users add admin admin --perm.admin &&
+          filebrowser -d /config/filebrowser.db config set --branding.name 'UDMS FileBrowser' --port 80 --root /data --address 0.0.0.0;
+        fi &&
+        exec filebrowser -d /config/filebrowser.db --port 80 --address 0.0.0.0
+      "

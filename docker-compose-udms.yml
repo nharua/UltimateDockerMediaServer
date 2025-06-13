@@ -23,4 +23,14 @@ include:
   - compose/$HOSTNAME/jellyfin.yml
   # DOWNLOADERS
   - compose/$HOSTNAME/qbittorrent.yml
+  - compose/$HOSTNAME/sabnzbd.yml
+  # PVRS
+  - compose/$HOSTNAME/radarr.yml
+  - compose/$HOSTNAME/sonarr.yml
+  # COMPLEMENTARY APPS
+  - compose/$HOSTNAME/bazarr.yml
+  # UTILITIES
+  - compose/$HOSTNAME/filebrowser.yml
+  # MAINTENANCE
+  - compose/$HOSTNAME/docker-gc.yml
 

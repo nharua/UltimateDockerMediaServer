@@ -1,7 +1,24 @@
 # 🎬 Ultimate Docker Media Server (UDMS)
 
 **Ultimate Docker Media Server** is a homelab project that allows you to deploy your own media server system at home using Docker Compose. The system includes complete components for managing, monitoring, streaming, and downloading digital content — all managed through independent containers that are easy to scale and maintain.
+
+
 This project is based on the [Docker Media Server](https://www.simplehomelab.com/docker-media-server-2024/) project, with the goal of simplifying the deployment process and providing a standardized folder structure for easy management.
+
+---
+## 🔧 Configuration Tips
+
+### Initial Setup Order
+1. **Start with Core Services**: Ensure Portainer, Dozzle, and Homepage are running first
+2. **Configure Download Clients**: Set up qBittorrent and SABnzbd with proper download directories
+3. **Set up PVR Services**: Configure Radarr and Sonarr to use your download clients
+4. **Add Subtitle Management**: Configure Bazarr to work with Radarr and Sonarr
+5. **Configure Media Server**: Point Jellyfin to your organized media directories
+
+### Common Configuration
+- **Download Paths**: Configure consistent paths across all services (e.g., `/data/torrents`, `/data/usenet`)
+- **Media Paths**: Ensure all services can access the same media directories (e.g., `/data/media/movies`, `/data/media/tv`)
+- **User Permissions**: Make sure PUID and PGID are consistent across all services in your `.env` file
 
 ---
 
@@ -33,6 +50,28 @@ This project is based on the [Docker Media Server](https://www.simplehomelab.com
 | Service       | Description                      |
 |---------------|----------------------------------|
 | `qbittorrent` | Torrent client with web interface |
+| `sabnzbd`     | Usenet newsgroup downloader with web interface |
+
+**4. PVR Services (Personal Video Recorder)**
+| Service   | Description           |
+|-----------|-----------------------|
+| `radarr`  | Movie collection manager for Usenet and BitTorrent users |
+| `sonarr`  | TV series collection manager for Usenet and BitTorrent users |
+
+**5. Complementary Apps**
+| Service   | Description           |
+|-----------|-----------------------|
+| `bazarr`  | Subtitle management for Radarr and Sonarr |
+
+**6. Utilities**
+| Service       | Description                      |
+|---------------|----------------------------------|
+| `filebrowser` | Web-based file manager with sharing capabilities |
+
+**7. Maintenance**
+| Service    | Description           |
+|------------|-----------------------|
+| `docker-gc`| Docker garbage collection for cleanup |
 
 ---
 
@@ -134,4 +173,3 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 Contributions are welcome! Please open issues or submit pull requests via GitHub. For major changes, open an issue first to discuss what you would like to change.
 ```
-
