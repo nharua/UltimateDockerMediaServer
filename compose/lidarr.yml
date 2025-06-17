@@ -1,0 +1,23 @@
+services:
+  # Lidarr - Music Management
+  lidarr:
+    image: lscr.io/linuxserver/lidarr:latest
+    container_name: lidarr
+    security_opt:
+      - no-new-privileges:true
+    restart: "no"
+    # profiles: ["media", "starr", "all"]
+    networks:
+      media_network:
+        ipv4_address: ${LIDARR_IP}
+    ports:
+      - "$LIDARR_PORT:8686"
+    volumes:
+      - $DOCKERDIR/appdata/lidarr:/config
+      - $DATADIR/downloads:/data/downloads
+      - $DATADIR/media/music:/data/music
+      - "/etc/localtime:/etc/localtime:ro"
+    environment:
+      TZ: $TZ
+      PUID: $PUID
+      PGID: $PGID

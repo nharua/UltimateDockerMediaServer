@@ -6,9 +6,10 @@ services:
       - no-new-privileges:true
     restart: unless-stopped
     networks:
-      - default
+      media_network:
+        ipv4_address: ${RADARR_IP}
     ports:
-      - "7878:7878"
+      - "${RADARR_PORT}:7878"
     volumes:
       - $DOCKERDIR/appdata/radarr:/config
       
@@ -16,8 +17,7 @@ services:
       - $DATADIR/media/movies:/data/movies
       
       # Nơi SABnzbd và qBittorrent lưu file tải về (cần trùng đường dẫn trong app kia)
-      - $DATADIR/usenet:/data/usenet
-      - $DATADIR/torrents:/data/torrents
+      - $DATADIR/downloads:/data/downloads
       
       # Option: đồng bộ timezone hệ thống
       - /etc/localtime:/etc/localtime:ro

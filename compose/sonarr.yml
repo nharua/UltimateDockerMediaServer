@@ -6,14 +6,14 @@ services:
       - no-new-privileges:true
     restart: unless-stopped
     networks:
-      - default
+      media_network:
+        ipv4_address: ${SONARR_IP}
     ports:
-      - "8989:8989"
+      - "${SONARR_PORT}:8989"
     volumes:
       - $DOCKERDIR/appdata/sonarr:/config
       - $DATADIR/media/tv:/data/tv
-      - $DATADIR/usenet:/data/usenet
-      - $DATADIR/torrents:/data/torrents
+      - $DATADIR/downloads:/data/downloads
       - /etc/localtime:/etc/localtime:ro
     environment:
       TZ: $TZ

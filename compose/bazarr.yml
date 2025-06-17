@@ -1,5 +1,6 @@
 services:
   # Bazarr - Subtitle Management
+  # Guide: https://www.youtube.com/watch?v=8vZ95HOdT-I
   bazarr:
     image: lscr.io/linuxserver/bazarr
     container_name: bazarr
@@ -7,9 +8,10 @@ services:
       - no-new-privileges:true
     restart: unless-stopped
     networks:
-      - default
+      media_network:
+          ipv4_address: ${BAZARR_IP}
     ports:
-      - "6767:6767"
+      - "${BAZARR_PORT}:6767"
     volumes:
       - $DOCKERDIR/appdata/bazarr:/config
       - $DATADIR/media/movies:/data/movies

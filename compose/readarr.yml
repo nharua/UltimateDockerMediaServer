@@ -1,0 +1,24 @@
+services:
+  # Readarr - eBooks Management
+  readarr:
+    image: lscr.io/linuxserver/readarr:develop
+    container_name: readarr
+    security_opt:
+      - no-new-privileges:true
+    restart: "no"
+    # profiles: ["media", "starr", "all"]
+    networks:
+      media_network:
+          ipv4_address: ${READARR_IP}
+    ports:
+      - "${READARR_PORT}:8787"
+    volumes:
+      - $DOCKERDIR/appdata/readarr:/config
+      - $DATADIR/media/books:/data/books
+      - $DATADIR/downloads:/data/downloads 
+      - "/etc/localtime:/etc/localtime:ro"
+    environment:
+      TZ: $TZ
+      PUID: $PUID
+      PGID: $PGID
+    # DOCKER-LABELS-PLACEHOLDER

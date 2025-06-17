@@ -24,6 +24,7 @@ fi
 echo -e "\n📁 Tạo các thư mục trong DOCKERDIR..."
 DOCKER_FOLDERS=(
   "$DOCKERDIR/appdata/jellyfin"
+  "$DOCKERDIR/appdata/docker-gc"
   "$DOCKERDIR/compose/$HOSTNAME"
   "$DOCKERDIR/logs"
   "$DOCKERDIR/scripts"
@@ -41,6 +42,10 @@ for folder in "${DOCKER_FOLDERS[@]}"; do
   fi
 done
 
+echo -e "\n📝 Tạo file rỗng docker-gc-exclude tại $DOCKERDIR/appdata/docker-gc/ ..."
+sudo touch "$DOCKERDIR/appdata/docker-gc/docker-gc-exclude"
+sudo chown "$USERID:$GROUPID" "$DOCKERDIR/appdata/docker-gc/docker-gc-exclude"
+
 echo -e "\n📁 Tạo các thư mục dữ liệu trong DATADIR..."
 DATA_FOLDERS=(
   "$DATADIR/media/books"
@@ -49,17 +54,7 @@ DATA_FOLDERS=(
   "$DATADIR/media/m_music"
   "$DATADIR/media/tv"
   "$DATADIR/media/pictures"
-  "$DATADIR/torrents/books"
-  "$DATADIR/torrents/movies"
-  "$DATADIR/torrents/music"
-  "$DATADIR/torrents/m_music"
-  "$DATADIR/torrents/tv"
-  "$DATADIR/usenet/incomplete"
-  "$DATADIR/usenet/complete/books"
-  "$DATADIR/usenet/complete/movies"
-  "$DATADIR/usenet/complete/music"
-  "$DATADIR/usenet/complete/m_music"
-  "$DATADIR/usenet/complete/tv"
+  "$DATADIR/downloads"
 )
 
 for folder in "${DATA_FOLDERS[@]}"; do
@@ -95,6 +90,46 @@ USERDIR="$USERDIR"
 DOCKERDIR="$DOCKERDIR"
 DATADIR="$DATADIR"
 HOSTNAME="$HOSTNAME"
+# Socket Service
+SOCKET_IP="192.168.91.254"
+# Portainer
+PORTAINER_PORT="9000"
+PORTAINER_SOCKET_IP="192.168.91.253"
+# Dozzle 
+DOZZLE_PORT="9999"
+DOZZLE_SOCKET_IP="192.168.91.252"
+DOZZLE_IP="192.168.90.252"
+# Homepage dashboard
+HOMEPAGE_PORT="3000"
+HOMEPAGE_SOCKET_IP="192.168.91.251"
+HOMEPAGE_IP="192.168.90.251"
+# Prowlarr
+PROWLARR_PORT="9696"
+PROWLARR_IP="192.168.90.200"
+# Jellyfin
+JELLYFIN_PORT="8096"
+JELLYFIN_IP="192.168.90.201"
+# qBittorrent
+QBITTORRENT_PORT="8081"
+QBITTORRENT_IP="192.168.90.202"
+# Radarr
+RADARR_PORT="7878"
+RADARR_IP="192.168.90.203"
+# Sonarr
+SONARR_PORT="8989"
+SONARR_IP="192.168.90.204"
+# Lidarr
+LIDARR_PORT="8686"
+LIDARR_IP="192.168.90.205"
+# Readarr
+READARR_PORT="8787"
+READARR_IP="192.168.90.206"
+# Bazarr
+BAZARR_PORT="6767"
+BAZARR_IP="192.168.90.207"
+# FileBrowser
+FILEBROWSER_PORT="8080"
+FILEBROWSER_IP="192.168.90.208"
 
 # Jellyfin Transcode Config
 TRANSCODE=$TRANSCODE

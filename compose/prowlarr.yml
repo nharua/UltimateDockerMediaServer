@@ -1,0 +1,23 @@
+services:
+  # Prowlarr - Index Manager
+  prowlarr:
+    image: ghcr.io/linuxserver/prowlarr:develop
+    container_name: prowlarr
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    # profiles: ["apps", "starr", "all"]
+    networks:
+      media_network:
+        ipv4_address: ${PROWLARR_IP}
+    ports:
+      - "${PROWLARR_PORT}:9696"
+    volumes:
+      - $DOCKERDIR/appdata/prowlarr:/config
+      - $DATADIR/downloads:/data/downloads
+      - "/etc/localtime:/etc/localtime:ro"
+    environment:
+      TZ: $TZ
+      PUID: $PUID
+      PGID: $PGID
+    # DOCKER-LABELS-PLACEHOLDER

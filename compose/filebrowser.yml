@@ -7,15 +7,15 @@ services:
     restart: unless-stopped
     # profiles: ["apps", "all"]
     networks:
-      - default
+      media_network:
+        ipv4_address: ${FILEBROWSER_IP}
     ports:
-      - "8080:80"  # Sử dụng port 8080 thay vì 81
+      - "${FILEBROWSER_PORT}:80"  # Sử dụng port 8080 thay vì 81
     volumes:
       - $DOCKERDIR/appdata/filebrowser:/config
       - $USERDIR:/data/home
       - $DATADIR/media:/data/media
-      - $DATADIR/torrents:/data/torrents
-      - $DATADIR/usenet:/data/usenet
+      - $DATADIR/downloads:/data/downloads
     environment:
       TZ: $TZ
       PUID: $PUID

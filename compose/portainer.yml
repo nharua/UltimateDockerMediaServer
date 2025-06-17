@@ -8,11 +8,12 @@ services:
     restart: unless-stopped
     # profiles: ["core", "all"]
     networks:
-      - socket_proxy
+      socket_proxy:
+        ipv4_address: ${PORTAINER_SOCKET_IP}
     # command: -H unix:///var/run/docker.sock # # Use Docker Socket Proxy instead for improved security
     command: -H tcp://socket-proxy:2375
     ports:
-      - "9000:9000"
+      - "${PORTAINER_PORT}:9000"
     volumes:
       # - /var/run/docker.sock:/var/run/docker.sock:ro # # Use Docker Socket Proxy instead for improved security
       - $DOCKERDIR/appdata/portainer/data:/data # Change to local directory if you want to save/transfer config locally

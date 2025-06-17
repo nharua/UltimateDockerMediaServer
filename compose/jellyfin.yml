@@ -4,7 +4,8 @@ services:
     image: jellyfin/jellyfin:latest
     container_name: jellyfin
     networks:
-      - default
+      media_network:
+          ipv4_address: ${JELLYFIN_IP}
     security_opt:
       - no-new-privileges:true
     restart: "no"
@@ -13,7 +14,7 @@ services:
     devices:
       - /dev/dri:/dev/dri # for harware transcoding
     ports:
-      - "8096:8096"
+      - "${JELLYFIN_PORT}:8096"
       # - "8920:8920" # Emby also uses same port if running both
     environment:
       UMASK_SET: 022
@@ -21,6 +22,6 @@ services:
     volumes:
       - $DOCKERDIR/appdata/jellyfin:/config
       - $DATADIR/media:/data
-      - $DATADIR/torrents:/t_downloads
-      - $DATADIR/usenet:/u_downloads
+      - $DATADIR/downloads:/t_downloads
+      # - $DATADIR/usenet:/u_downloads
       - $TRANSCODE:/transcode

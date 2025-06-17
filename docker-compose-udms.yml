@@ -1,7 +1,11 @@
 ########################### NETWORKS
 networks:
-  default:
+  media_network:
+    name: media_network
     driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.90.0/24
   socket_proxy:
     name: socket_proxy
     driver: bridge
@@ -19,14 +23,18 @@ include:
   - compose/$HOSTNAME/portainer.yml
   - compose/$HOSTNAME/dozzle.yml
   - compose/$HOSTNAME/homepage.yml
+  # INDEXERS
+  - compose/$HOSTNAME/prowlarr.yml
   # MEDIA
   - compose/$HOSTNAME/jellyfin.yml
   # DOWNLOADERS
   - compose/$HOSTNAME/qbittorrent.yml
-  - compose/$HOSTNAME/sabnzbd.yml
+  # - compose/$HOSTNAME/sabnzbd.yml
   # PVRS
   - compose/$HOSTNAME/radarr.yml
   - compose/$HOSTNAME/sonarr.yml
+  - compose/$HOSTNAME/lidarr.yml
+  - compose/$HOSTNAME/readarr.yml
   # COMPLEMENTARY APPS
   - compose/$HOSTNAME/bazarr.yml
   # UTILITIES

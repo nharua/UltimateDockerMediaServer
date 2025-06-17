@@ -8,12 +8,13 @@ services:
     restart: unless-stopped
     # profiles: ["apps", "downloads", "all"]
     networks:
-      - default
+      media_network:
+        ipv4_address: ${QBITTORRENT_IP}
     ports:
-      - "8081:8080"
+      - "${QBITTORRENT_PORT}:8080"
     volumes:
       - $DOCKERDIR/appdata/qbittorrent:/config
-      - $DATADIR/torrents:/data/downloads # Ensure that downloads folder is set to /data/downloads in qBittorrent
+      - $DATADIR/downloads:/data/downloads # Ensure that downloads folder is set to /data/downloads in qBittorrent
     environment:
       TZ: $TZ
       PUID: $PUID

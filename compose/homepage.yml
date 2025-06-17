@@ -8,13 +8,16 @@ services:
     restart: unless-stopped
     # profiles: ["apps", "all"]
     networks:
-      - socket_proxy
-      - default
+      socket_proxy:
+        ipv4_address: ${HOMEPAGE_SOCKET_IP}
+      media_network:
+        ipv4_address: ${HOMEPAGE_IP}
     ports:
-      - "3000:3000"
+      - "${HOMEPAGE_PORT}:3000"
     volumes:
       - $DOCKERDIR/appdata/homepage:/app/config
     environment:
       TZ: $TZ
       PUID: $PUID
       PGID: $PGID
+      HOMEPAGE_ALLOWED_HOSTS: "localhost,127.0.0.1,${HOMEPAGE_IP}:${HOMEPAGE_PORT},${HOMEPAGE_SOCKET_IP}:${HOMEPAGE_PORT}"
