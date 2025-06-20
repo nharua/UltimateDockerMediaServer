@@ -1,0 +1,42 @@
+- Core Services:
+  - Portainer:
+      icon: portainer.png
+      href: http://192.168.91.253:9000
+  - Dozzle:
+      icon: dozzle.png
+      href: http://192.168.91.252:8080
+
+- Media Servers:
+  - Jellyfin:
+      icon: jellyfin.png
+      href: http://192.168.90.201:8096
+  - File Browser:
+      icon: filebrowser.png
+      href: http://192.168.90.208:80
+
+- Download Clients:
+  - qBittorrent:
+      icon: qbittorrent.png
+      href: http://192.168.90.202:8080
+
+- Media Managers:
+  - Radarr:
+      icon: radarr.png
+      href: http://192.168.90.203:7878
+  - Sonarr:
+      icon: sonarr.png
+      href: http://192.168.90.204:8989
+  - Lidarr:
+      icon: lidarr.png
+      href: http://192.168.90.205:8686
+  - Readarr:
+      icon: readarr.png
+      href: http://192.168.90.206:8787
+  - Bazarr:
+      icon: bazarr.png
+      href: http://192.168.90.207:6767
+
+- Indexers:
+  - Prowlarr:
+      icon: prowlarr.png
+      href: http://192.168.90.200:9696

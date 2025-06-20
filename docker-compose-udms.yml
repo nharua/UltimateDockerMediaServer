@@ -41,4 +41,6 @@ include:
   - compose/$HOSTNAME/filebrowser.yml
   # MAINTENANCE
   - compose/$HOSTNAME/docker-gc.yml
+  # PICTURE
+  - compose/$HOSTNAME/immich.yml
 
