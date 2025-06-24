@@ -1,0 +1,16 @@
+services:
+  twingate:
+    container_name: $TWINGATE_CONNECTOR
+    restart: unless-stopped
+    image: "twingate/connector:latest"
+    environment:
+      - TWINGATE_NETWORK=$TWINGATE_NETWORK
+      - TWINGATE_ACCESS_TOKEN=$TWINGATE_ACCESS_TOKEN
+      - TWINGATE_REFRESH_TOKEN=$TWINGATE_REFRESH_TOKEN
+      - TWINGATE_LOG_ANALYTICS=v2
+      - TWINGATE_LOG_LEVEL=3
+    networks:
+      macvlan_net:
+        ipv4_address: $TWINGATE_IP
+    sysctls:
+      net.ipv4.ping_group_range: "0 2147483647"

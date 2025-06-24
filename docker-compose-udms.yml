@@ -12,7 +12,16 @@ networks:
     ipam:
       config:
         - subnet: 192.168.91.0/24
- 
+  macvlan_net:
+    name: macvlan_net
+    driver: macvlan
+    driver_opts:
+      parent: enp0s20u1
+    ipam:
+      config:
+        - subnet: 192.168.100.0/24
+          gateway: 192.168.100.1
+
 include:
   ########################### SERVICES
   # PREFIX udms = Ultimate Docker Media Server
@@ -43,4 +52,10 @@ include:
   - compose/$HOSTNAME/docker-gc.yml
   # PICTURE
   - compose/$HOSTNAME/immich.yml
+  # TWINGATE
+  - compose/$HOSTNAME/twingate.yml
+  # UNBOUND
+  - compose/$HOSTNAME/unbound.yml
+  # PIHOLE
+  - compose/$HOSTNAME/pihole.yml
 

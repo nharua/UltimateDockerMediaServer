@@ -1,0 +1,28 @@
+services:
+  pihole:
+    container_name: pihole
+    image: pihole/pihole:latest
+    hostname: pihole
+    restart: unless-stopped
+    networks:
+      macvlan_net:
+        ipv4_address: $PIHOLE_IP
+    environment:
+      # Set the appropriate timezone for your location
+      TZ: $TZ
+      # Set a password to access the web interface
+      FTLCONF_webserver_api_password: $PIHOLE_WEB_PW
+      PIHOLE_DNS_: $UNBOUND_IP#53
+      DNSMASQ_LISTENING: local
+    volumes:
+      # For persisting Pi-hole's databases and configuration
+      - $DOCKERDIR/appdata/pihole:/etc/pihole
+      # Uncomment if you have custom dnsmasq config files
+      - $DOCKERDIR/appdata/dnsmasq.d:/etc/dnsmasq.d
+    cap_add:
+      # Required for DHCP functionality (uncomment if using Pi-hole as DHCP)
+      # - NET_ADMIN
+      # Required for NTP functionality
+      # - SYS_TIME
+      # Optional performance enhancement
+      - SYS_NICE
