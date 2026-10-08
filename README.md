@@ -11,13 +11,14 @@ This project is based on the [Docker Media Server](https://www.simplehomelab.com
 ### Initial Setup Order
 1. **Start with Core Services**: Ensure Portainer, Dozzle, and Homepage are running first
 2. **Configure Download Clients**: Set up qBittorrent and SABnzbd with proper download directories
-3. **Set up PVR Services**: Configure Radarr and Sonarr to use your download clients
-4. **Add Subtitle Management**: Configure Bazarr to work with Radarr and Sonarr
-5. **Configure Media Server**: Point Jellyfin to your organized media directories
+3. **Configure Indexers**: Set up Prowlarr to sync indexers to Radarr, Sonarr, Lidarr, Readarr
+4. **Set up PVR Services**: Configure Radarr and Sonarr to use your download clients and indexers
+5. **Add Subtitle Management**: Configure Bazarr+ to work with Radarr and Sonarr; set FlareSolverr (`http://flaresolverr:8191/v1`) for OpenSubtitles Provider Hub plugin
+6. **Configure Media Server**: Point Jellyfin to your organized media directories
 
 ### Common Configuration
-- **Download Paths**: Configure consistent paths across all services (e.g., `/data/torrents`, `/data/usenet`)
-- **Media Paths**: Ensure all services can access the same media directories (e.g., `/data/media/movies`, `/data/media/tv`)
+- **Download Paths**: Configure consistent paths across all services (e.g., `/data/downloads`, `/data/usenet`)
+- **Media Paths**: Ensure all services can access the same media directories (e.g., `/data/movies`, `/data/tv`)
 - **User Permissions**: Make sure PUID and PGID are consistent across all services in your `.env` file
 
 ---
@@ -41,34 +42,54 @@ This project is based on the [Docker Media Server](https://www.simplehomelab.com
 | `dozzle`      | Real-time container log monitoring |
 | `homepage`    | Dashboard displaying all services |
 
-**2. Media Services**
+**2. Indexers**
+| Service   | Description           |
+|-----------|-----------------------|
+| `prowlarr`| Indexer manager for Usenet and BitTorrent |
+
+**3. Media Services**
 | Service   | Description           |
 |-----------|-----------------------|
 | `jellyfin`| Open-source media server for streaming movies/music |
 
-**3. Downloader Services**
+**4. Downloader Services**
 | Service       | Description                      |
 |---------------|----------------------------------|
 | `qbittorrent` | Torrent client with web interface |
 | `sabnzbd`     | Usenet newsgroup downloader with web interface |
 
-**4. PVR Services (Personal Video Recorder)**
+**5. PVR Services (Personal Video Recorder)**
 | Service   | Description           |
 |-----------|-----------------------|
 | `radarr`  | Movie collection manager for Usenet and BitTorrent users |
 | `sonarr`  | TV series collection manager for Usenet and BitTorrent users |
+| `lidarr`  | Music collection manager |
+| `readarr` | Book and audiobook collection manager |
 
-**5. Complementary Apps**
+**6. Complementary Apps**
+| Service       | Description           |
+|---------------|-----------------------|
+| `bazarr`      | Subtitle management for Radarr and Sonarr ([Bazarr+](https://lavx.github.io/bazarr/)) |
+| `flaresolverr`| Proxy server to bypass Cloudflare protection for subtitle/indexer scrapers |
+
+**7. Photo Management**
 | Service   | Description           |
 |-----------|-----------------------|
-| `bazarr`  | Subtitle management for Radarr and Sonarr |
+| `immich`  | High-performance self-hosted photo and video management solution |
 
-**6. Utilities**
+**8. Utilities**
 | Service       | Description                      |
 |---------------|----------------------------------|
 | `filebrowser` | Web-based file manager with sharing capabilities |
 
-**7. Maintenance**
+**9. Networking & DNS**
+| Service    | Description           |
+|------------|-----------------------|
+| `twingate` | Zero Trust Network Access (ZTNA) connector |
+| `pihole`   | Network-wide ad and tracker blocking via DNS sinkholing |
+| `unbound`  | Validating, recursive, and caching DNS resolver |
+
+**10. Maintenance**
 | Service    | Description           |
 |------------|-----------------------|
 | `docker-gc`| Docker garbage collection for cleanup |
@@ -79,15 +100,25 @@ This project is based on the [Docker Media Server](https://www.simplehomelab.com
 ```yaml
 DOCKERDIR/
 ├── appdata/
-│ └── jellyfin/
+│   ├── bazarr/
+│   ├── jellyfin/
+│   ├── prowlarr/
+│   ├── radarr/
+│   ├── sonarr/
+│   └── ...
 ├── compose/
-│ └── udms/
-│   ├── socket-proxy.yml
-│   ├── portainer.yml
-│   ├── dozzle.yml
-│   ├── homepage.yml
-│   ├── jellyfin.yml
-│   └── qbittorrent.yml
+│   └── <HOSTNAME>/
+│       ├── bazarr.yml
+│       ├── dozzle.yml
+│       ├── homepage.yml
+│       ├── jellyfin.yml
+│       ├── portainer.yml
+│       ├── prowlarr.yml
+│       ├── qbittorrent.yml
+│       ├── radarr.yml
+│       ├── socket-proxy.yml
+│       ├── sonarr.yml
+│       └── ...
 ├── logs/
 ├── scripts/
 ├── secrets/
@@ -97,13 +128,12 @@ DOCKERDIR/
 
 DATADIR/
 ├── media/
-│ ├── movies/
-│ ├── tv/
-│ └── ...
-├── torrents/
-│ └── ...
-└── usenet/
-└── ...
+│   ├── books/
+│   ├── movies/
+│   ├── music/
+│   ├── pictures/
+│   └── tv/
+└── downloads/
 ```
 
 ## 🛠️ System Requirements
@@ -144,13 +174,24 @@ sudo docker-compose -f docker-compose-udms.yml up -d
 
 After deployment, you can access your media server and management interfaces using the following default URLs (replace `localhost` with your server's IP if accessing remotely):
 
+- **Homepage Dashboard**: [http://localhost:3000](http://localhost:3000)
 - **Jellyfin**: [http://localhost:8096](http://localhost:8096)
 - **Portainer**: [http://localhost:9000](http://localhost:9000)
-- **Dozzle**: [http://localhost:8082](http://localhost:8082)
-- **Homepage Dashboard**: [http://localhost:3000](http://localhost:3000)
+- **Dozzle**: [http://localhost:9999](http://localhost:9999)
 - **qBittorrent Web UI**: [http://localhost:8081](http://localhost:8081)
+- **Prowlarr**: [http://localhost:9696](http://localhost:9696)
+- **Radarr**: [http://localhost:7878](http://localhost:7878)
+- **Sonarr**: [http://localhost:8989](http://localhost:8989)
+- **Lidarr**: [http://localhost:8686](http://localhost:8686)
+- **Readarr**: [http://localhost:8787](http://localhost:8787)
+- **Bazarr+**: [http://localhost:6767](http://localhost:6767)
+- **FlareSolverr**: [http://localhost:8191](http://localhost:8191)
+- **FileBrowser**: [http://localhost:8080](http://localhost:8080)
+- **Immich**: [http://localhost:2283](http://localhost:2283)
 
-> Default ports can be changed in the respective compose YAML files under `compose/udms/`.
+> [!TIP]
+> - Trong Bazarr+, cấu hình FlareSolverr URL trong plugin Provider Hub (OpenSubtitles.org) là `http://flaresolverr:8191/v1`.
+> - Default ports và IP có thể tùy chỉnh trong file `.env` được tạo bởi `init_udms.sh`.
 
 ---
 ## ❓ Troubleshooting & FAQ
@@ -172,4 +213,3 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ## 🤝 Contributions
 
 Contributions are welcome! Please open issues or submit pull requests via GitHub. For major changes, open an issue first to discuss what you would like to change.
-```

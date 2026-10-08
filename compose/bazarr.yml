@@ -1,23 +1,83 @@
 services:
-  # Bazarr - Subtitle Management
-  # Guide: https://www.youtube.com/watch?v=8vZ95HOdT-I
+  # Bazarr+ - Subtitle Management
+  # Guide: https://lavx.github.io/bazarr/guides/getting-started.html
   bazarr:
-    image: lscr.io/linuxserver/bazarr
+    image: ghcr.io/lavx/bazarr:latest
     container_name: bazarr
-    security_opt:
-      - no-new-privileges:true
     restart: unless-stopped
     networks:
       media_network:
-          ipv4_address: ${BAZARR_IP}
+        ipv4_address: ${BAZARR_IP}
     ports:
       - "${BAZARR_PORT}:6767"
     volumes:
       - $DOCKERDIR/appdata/bazarr:/config
       - $DATADIR/media/movies:/data/movies
       - $DATADIR/media/tv:/data/tv
+      - /etc/localtime:/etc/localtime:ro
     environment:
       TZ: $TZ
       PUID: $PUID
       PGID: $PGID
+    # Container hardening recommended by Bazarr+
+    read_only: true
+    tmpfs:
+      - /tmp:size=512m
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETUID
+      - SETGID
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:6767/_supervisor/status | grep -q '\"running\"'"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # FlareSolverr - Proxy server to bypass Cloudflare protection for subtitle/indexer scrapers
+  # Recommended for Bazarr+ OpenSubtitles.org Provider Hub plugin (and Prowlarr indexers)
+  # In Bazarr+: Set FlareSolverr URL to http://flaresolverr:8191/v1 (or http://192.168.90.209:8191/v1)
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    networks:
+      media_network:
+        ipv4_address: ${FLARESOLVERR_IP:-192.168.90.209}
+    ports:
+      - "${FLARESOLVERR_PORT:-8191}:8191"
+    environment:
+      - LOG_LEVEL=${FLARESOLVERR_LOG_LEVEL:-info}
+      - LOG_HTML=false
+      - CAPTCHA_SOLVER=none
+      - TZ=$TZ
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8191/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # AI Subtitle Translator (Tùy chọn - Dịch phụ đề bằng AI qua OpenRouter)
+  # Cấu hình API key trong Bazarr+: Settings > AI Translator
+  # ai-subtitle-translator:
+  #   image: ghcr.io/lavx/ai-subtitle-translator:latest
+  #   container_name: ai-subtitle-translator
+  #   restart: unless-stopped
+  #   networks:
+  #     - media_network
+  #   ports:
+  #     - "8765:8765"
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-sf", "http://localhost:8765/health"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 10s
 
