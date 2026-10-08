@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Đặt thư mục gốc
+# Set root directory
 ROOT_DIR="./data"
 
-# Danh sách thư mục con cần tạo
+# List of subdirectories to create
 DIRS=(
   "$ROOT_DIR/torrents/books"
   "$ROOT_DIR/torrents/movies"
@@ -21,17 +21,17 @@ DIRS=(
   "$ROOT_DIR/media/pictures"
 )
 
-# Tạo các thư mục
+# Create directories
 for dir in "${DIRS[@]}"; do
   mkdir -p "$dir"
 done
 
-# Cấp quyền chmod và ACL
+# Set chmod and ACL permissions
 sudo chmod 775 "$ROOT_DIR"
 sudo setfacl -Rdm u:$USER:rwx "$ROOT_DIR"
 sudo setfacl -Rm u:$USER:rwx "$ROOT_DIR"
 sudo setfacl -Rdm g:docker:rwx "$ROOT_DIR"
 sudo setfacl -Rm g:docker:rwx "$ROOT_DIR"
 
-echo "✅ Thư mục đã được tạo và phân quyền thành công."
+echo "✅ Directories created and permissions set successfully."
 

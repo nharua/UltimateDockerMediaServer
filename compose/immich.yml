@@ -98,7 +98,7 @@ services:
     security_opt:
       - no-new-privileges:true
     restart: unless-stopped
-    # profiles: ["core", "all"]  # Bạn có thể giữ lại nếu dùng profile
+    # profiles: ["core", "all"]  # Uncomment if using profiles
     command: redis-server --save "" --maxmemory 256mb --appendonly no --maxmemory-policy allkeys-lru
     healthcheck:
       test: ["CMD-SHELL", "redis-cli ping | grep PONG"]

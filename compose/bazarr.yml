@@ -64,8 +64,8 @@ services:
       retries: 3
       start_period: 60s
 
-  # AI Subtitle Translator (Tùy chọn - Dịch phụ đề bằng AI qua OpenRouter)
-  # Cấu hình API key trong Bazarr+: Settings > AI Translator
+  # AI Subtitle Translator (Optional - AI subtitle translation via OpenRouter)
+  # Configure API key in Bazarr+: Settings > AI Translator
   # ai-subtitle-translator:
   #   image: ghcr.io/lavx/ai-subtitle-translator:latest
   #   container_name: ai-subtitle-translator

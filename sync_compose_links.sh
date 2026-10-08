@@ -1,36 +1,36 @@
 #!/usr/bin/env bash
 set -e
 
-echo -e "\n🧩 Đồng bộ các file compose..."
+echo -e "\n🧩 Syncing compose files..."
 
-# Hỏi thông tin nếu không lấy từ .env
-read -rp "Nhập tên HOSTNAME (ví dụ: udms): " HOSTNAME
-read -rp "Nhập đường dẫn DOCKERDIR (ví dụ: /home/docker): " DOCKERDIR
+# Prompt for info if not loaded from .env
+read -rp "Enter HOSTNAME (e.g., udms): " HOSTNAME
+read -rp "Enter DOCKERDIR path (e.g., /home/docker): " DOCKERDIR
 
 SOURCE_DIR="./compose"
 DEST_DIR="$DOCKERDIR/compose/$HOSTNAME"
 
-# Kiểm tra folder compose có tồn tại không
+# Check if compose directory exists
 if [ ! -d "$SOURCE_DIR" ]; then
-  echo "❌ Không tìm thấy thư mục $SOURCE_DIR, hãy chạy từ root dự án!"
+  echo "❌ Directory $SOURCE_DIR not found, please run from project root!"
   exit 1
 fi
 
-# Duyệt từng file .yml trong ./compose
-echo -e "\n🔗 Tạo symlink cho các file *.yml..."
+# Loop through each .yml file in ./compose
+echo -e "\n🔗 Creating symlinks for *.yml files..."
 for file in "$SOURCE_DIR"/*.yml; do
   [ -e "$file" ] || continue
   base=$(basename "$file")
   target="$DEST_DIR/$base"
 
-  # Nếu đã link đúng thì bỏ qua
+  # Skip if symlink is already correct
   if [ -L "$target" ] && [ "$(readlink -f "$target")" == "$(realpath "$file")" ]; then
-    echo "✅ Đã tồn tại đúng: $target"
+    echo "✅ Already linked correctly: $target"
   else
     ln -sf "$(realpath "$file")" "$target"
-    echo "🔗 Đã link: $base → $DEST_DIR/"
+    echo "🔗 Linked: $base → $DEST_DIR/"
   fi
 done
 
-echo -e "\n✅ Đồng bộ hoàn tất!"
+echo -e "\n✅ Sync completed!"
 

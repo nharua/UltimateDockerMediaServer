@@ -13,13 +13,13 @@ services:
     volumes:
       - $DOCKERDIR/appdata/radarr:/config
       
-      # Thư viện phim (nơi radarr sẽ move các phim sau khi tải)
+      # Movie library (where Radarr moves movies after download)
       - $DATADIR/media/movies:/data/movies
       
-      # Nơi SABnzbd và qBittorrent lưu file tải về (cần trùng đường dẫn trong app kia)
+      # Download folder from download clients (must match path in qBittorrent/SABnzbd)
       - $DATADIR/downloads:/data/downloads
       
-      # Option: đồng bộ timezone hệ thống
+      # Option: sync host system timezone
       - /etc/localtime:/etc/localtime:ro
     environment:
       TZ: $TZ
