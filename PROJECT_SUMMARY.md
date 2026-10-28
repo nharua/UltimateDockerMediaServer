@@ -5,7 +5,18 @@
 
 ---
 
-## 🕒 Recent Session Summary (2026-10-08)
+## 🕒 Recent Session Summary (2026-10-28)
+
+### Tasks Completed
+1. **Debugged TheRARBG Custom Indexer in Prowlarr**:
+   - Diagnosed `500 Internal Server Error` and UI validation failure (`System.ArgumentOutOfRangeException: Unknown Cardigann setting. (Parameter 'info_freeleech')`) when adding TheRARBG indexer via `therarbg.yml`.
+   - Identified that Prowlarr's Cardigann schema parser does not support `type: info` in indexer settings (`info_freeleech`), causing `getUrls` and indexer testing to fail and leaving `Base Url` unpopulated.
+   - Cleaned `appdata/prowlarr/Definitions/Custom/therarbg.yml` by removing the unsupported `info_freeleech` block.
+   - Verified FlareSolverr proxy connectivity (`http://flaresolverr:8191/v1`) on `media_network` and restarted the `prowlarr` container to apply changes.
+
+---
+
+## 🕒 Previous Session Summary (2026-10-08)
 
 ### Tasks Completed
 1. **Migrated to Bazarr+**:
@@ -56,15 +67,11 @@
 
 ## 🚀 Next Steps / Recommendations
 
-1. **Deploy / Restart Services**:
-   - Recreate containers to apply image and configuration updates:
-     ```bash
-     cd $DOCKERDIR && sudo docker compose up -d bazarr flaresolverr
-     ```
+1. **Verify TheRARBG Indexer in Prowlarr**:
+   - Re-open Prowlarr (`http://<HOST_IP>:9696`), navigate to **Add Indexer**, select **TheRARBG**, ensure `Base Url` is selected, and click **Save**.
+   - Sync the indexer to downstream apps (Radarr, Sonarr) via **Settings > Apps**.
 2. **Configure Bazarr+ In-App Settings**:
    - Complete first-run wizard or login to `http://<HOST_IP>:6767`.
    - In **Subtitle Hub > Provider Hub Marketplace**, configure OpenSubtitles.org with FlareSolverr URL `http://flaresolverr:8191/v1`.
-3. **Optional Prowlarr Integration**:
-   - In Prowlarr (`http://<HOST_IP>:9696`), add FlareSolverr (`http://flaresolverr:8191/v1`) under **Settings > Indexers > FlareSolverr**.
-4. **Git Push**:
-   - Push recent commits to `origin/main` when ready.
+3. **Monitor FlareSolverr Performance**:
+   - Check container logs (`docker logs flaresolverr`) if any Cloudflare-protected indexers experience solver timeouts.

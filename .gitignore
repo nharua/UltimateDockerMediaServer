@@ -1,0 +1,7 @@
+# Environment and sensitive files
+.env
+*.env
+
+# Logs and diagnostic reports
+logs.report
+*.log
