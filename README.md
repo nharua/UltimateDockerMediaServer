@@ -109,6 +109,7 @@ DOCKERDIR/
 ├── compose/
 │   └── <HOSTNAME>/
 │       ├── bazarr.yml
+│       ├── flaresolverr.yml
 │       ├── dozzle.yml
 │       ├── homepage.yml
 │       ├── jellyfin.yml
@@ -170,6 +171,8 @@ Host folder names can be `Movies`, `TV_Series`, or any other name. Inside the ap
 `configure_storage.sh` asks for each directory, whether it is local or NAS storage, and the shared UID/GID. It saves the NAS mount target, source, and filesystem type for later comparison. On local storage, creating missing directories requires confirmation or `--create-local`. Existing directories keep their ownership and permissions. The script updates only storage settings and UID/GID in `.env`, preserving other variables and creating a private backup beside the file. `.env` and its backups contain secrets and must stay outside version control.
 
 All affected Compose bind mounts use `create_host_path: false`. A missing directory causes an error instead of silently creating an empty library. The storage scripts never mount shares, recursively change media permissions, or restart containers.
+
+Bazarr and FlareSolverr are defined separately in `compose/bazarr.yml` and `compose/flaresolverr.yml`. The root Compose file includes both. When updating an existing deployment, also deploy or link `flaresolverr.yml`; `init_udms.sh` and `sync_compose_links.sh` include it automatically.
 
 ## Deploy on a new server
 

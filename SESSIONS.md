@@ -168,3 +168,30 @@ Prevent media mount mismatches on new deployments and document setup and diagnos
 - Existing deployments must configure `MOVIES_DIR`, `TV_DIR`, and `DOWNLOADS_DIR` before using the updated Compose templates.
 - The live checks used temporary files only. The new scripts and Compose settings have not been deployed to `mydocker`.
 - NAS checks run on demand and do not monitor later disconnections.
+
+---
+
+## Session 4 - 2026-11-02
+
+### Task
+Separate FlareSolverr from the Bazarr Compose definition and load it from the root Compose file.
+
+### What was done
+- Moved the FlareSolverr service from `compose/bazarr.yml` to `compose/flaresolverr.yml`.
+- Added the new file to the root Compose include list and documented the deployment/link requirement in `README.md`.
+- Validated the complete Compose model and confirmed the resolved FlareSolverr service matches its previous configuration.
+- Confirmed the existing initialization and link-sync scripts pick up the new `.yml` file automatically.
+
+### Files modified
+- `compose/bazarr.yml` - Remove the FlareSolverr definition.
+- `compose/flaresolverr.yml` - Store the standalone FlareSolverr service.
+- `docker-compose-udms.yml` - Include the new service file.
+- `README.md` - Document the file split and existing-deployment requirement.
+- `SESSIONS.md` - Record the change and verification.
+
+### TODO / Next Steps
+- [ ] Deploy or link `compose/flaresolverr.yml` on `mydocker` when migrating the Compose templates.
+
+### Notes
+- Image, ports, network address, environment, healthcheck, and security settings remain unchanged.
+- The file split has not been applied to the running server.

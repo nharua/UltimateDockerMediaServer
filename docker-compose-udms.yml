@@ -46,6 +46,7 @@ include:
   - compose/$HOSTNAME/readarr.yml
   # COMPLEMENTARY APPS
   - compose/$HOSTNAME/bazarr.yml
+  - compose/$HOSTNAME/flaresolverr.yml
   # UTILITIES
   - compose/$HOSTNAME/filebrowser.yml
   # MAINTENANCE
