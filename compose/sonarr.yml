@@ -19,5 +19,5 @@ services:
       TZ: $TZ
       PUID: $PUID
       PGID: $PGID
-      UMASK_SET: 002
+      UMASK: "002"
 
