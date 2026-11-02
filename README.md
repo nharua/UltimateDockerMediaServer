@@ -18,7 +18,7 @@ This project is based on the [Docker Media Server](https://www.simplehomelab.com
 
 ### Common Configuration
 - **Download Paths**: Configure consistent paths across all services (e.g., `/data/downloads`, `/data/usenet`)
-- **Media Paths**: Ensure all services can access the same media directories (e.g., `/data/movies`, `/data/tv`)
+- **Media paths**: Configure `MOVIES_DIR`, `TV_DIR`, and `DOWNLOADS_DIR` once with `configure_storage.sh`. Keep `/data/movies`, `/data/tv`, and `/data/downloads` consistent inside the containers.
 - **User Permissions**: Make sure PUID and PGID are consistent across all services in your `.env` file
 
 ---
@@ -96,7 +96,7 @@ This project is based on the [Docker Media Server](https://www.simplehomelab.com
 
 ---
 
-## 📁 Directory Structure (after running `init_udms.sh`)
+## Directory structure
 ```yaml
 DOCKERDIR/
 ├── appdata/
@@ -126,6 +126,7 @@ DOCKERDIR/
 ├── .env
 ├── docker-compose-udms.yml <- symlink
 
+# Default local layout, created separately by configure_storage.sh
 DATADIR/
 ├── media/
 │   ├── books/
@@ -136,37 +137,190 @@ DATADIR/
 └── downloads/
 ```
 
-## 🛠️ System Requirements
+## System requirements
 
-- **Operating System**: Linux
-- **RAM**: ≥ 4GB (recommended ≥ 8GB if using transcoding)
-- **Software**: `docker`, `docker-compose`, `setfacl`, `bash`
-- **Permissions**: Account with `sudo` privileges
+- Linux, Bash, Python 3.9+, and `findmnt` from util-linux.
+- Docker Engine and the Docker Compose plugin, v2.20+ with `include` support. Commands below use `docker compose`.
+- `setfacl` for the application-data setup in `init_udms.sh`.
+- A user with sudo access. Run `init_udms.sh` as your normal login user; it calls sudo where needed.
+- Mount NAS shares on the Docker host before configuring storage. Set up persistent mounts through your system's mount configuration.
 
----
+## Shared storage configuration
 
-## 📦 Installation & Deployment
+The same `.env` variables supply every movie, TV, and download bind mount:
 
-### Step 1: Clone the repository
+```dotenv
+MOVIES_DIR="/mnt/nas/FamilyShare/Movies"
+TV_DIR="/mnt/nas/FamilyShare/TVShows"
+DOWNLOADS_DIR="/mnt/nas/Download"
+PUID=1001
+PGID=1001
+```
+
+Host folder names can be `Movies`, `TV_Series`, or any other name. Inside the applications, use these paths:
+
+| Application | Library or download path |
+|---|---|
+| Radarr | `/data/movies`, `/data/downloads` |
+| Sonarr | `/data/tv`, `/data/downloads` |
+| Bazarr | `/data/movies`, `/data/tv` |
+| qBittorrent / optional SABnzbd | `/data/downloads` |
+| Jellyfin | `/data/movies`, `/data/tv`, `/t_downloads` |
+
+`configure_storage.sh` asks for each directory, whether it is local or NAS storage, and the shared UID/GID. It saves the NAS mount target, source, and filesystem type for later comparison. On local storage, creating missing directories requires confirmation or `--create-local`. Existing directories keep their ownership and permissions. The script updates only storage settings and UID/GID in `.env`, preserving other variables and creating a private backup beside the file. `.env` and its backups contain secrets and must stay outside version control.
+
+All affected Compose bind mounts use `create_host_path: false`. A missing directory causes an error instead of silently creating an empty library. The storage scripts never mount shares, recursively change media permissions, or restart containers.
+
+## Deploy on a new server
+
+Run these steps in order. Replace `/home/udms` with the `DOCKERDIR` you choose.
+
+### 1. Clone and initialize the application configuration
+
 ```bash
 git clone https://github.com/nharua/UltimateDockerMediaServer.git
 cd UltimateDockerMediaServer
+bash ./init_udms.sh
 ```
 
-### Step 2: Grant execution permissions to the script
+Enter absolute `DOCKERDIR` and `DATADIR` paths and a deployment hostname. `DATADIR` remains the default base for other media, such as music, books, and photos. Initialization creates application directories, a base `.env`, and Compose links. It does not create media libraries or alter NAS permissions. It refuses to overwrite an existing `.env`.
+
+### 2. Mount storage, then configure the library paths
+
+For NAS storage, mount the shares on the host first. Verify the actual share before continuing:
+
 ```bash
-chmod +x init_udms.sh
+findmnt -T /mnt/nas/FamilyShare/Movies -o TARGET,SOURCE,FSTYPE
+findmnt -T /mnt/nas/FamilyShare/TVShows -o TARGET,SOURCE,FSTYPE
+findmnt -T /mnt/nas/Download -o TARGET,SOURCE,FSTYPE
+sudo bash ./configure_storage.sh --env-file /home/udms/.env
 ```
 
-### Step 3: Run the initialization script
+Choose `nas` for each directory on a network share. If a share is missing, restore it before running the script. NAS mode rejects a local filesystem at the expected mount location, even if an empty directory exists there.
+
+For a new local disk layout, the interactive script can create the directories after confirmation. The equivalent unattended command is:
+
 ```bash
-./init_udms.sh
+sudo bash ./configure_storage.sh --env-file /home/udms/.env \
+  --movies /srv/media/movies --tv /srv/media/tv \
+  --downloads /srv/media/downloads --storage-type local \
+  --puid 1001 --pgid 1001 --create-local --non-interactive
 ```
 
-### Step 4: Run Docker Compose
+Use the intended host account's UID/GID from `id`, rather than copying `1001` blindly. This account needs access to the storage on the host and through the NAS mount.
+
+### 3. Review the deployment settings and run the preflight check
+
 ```bash
-cd $DOCKERDIR
-sudo docker-compose -f docker-compose-udms.yml up -d
+sudoedit /home/udms/.env
+sudo bash ./check_storage.sh --env-file /home/udms/.env
+sudo docker compose --env-file /home/udms/.env \
+  -f /home/udms/docker-compose-udms.yml config --quiet
+```
+
+Replace placeholder service credentials and review ports, network addresses, the macvlan parent interface in `docker-compose-udms.yml`, and hardware settings such as Jellyfin's `/dev/dri` device. Prepare any additional music, books, or photo directories needed by the other services. The storage checker covers the movie/TV/download pipeline.
+
+The preflight check verifies directories, saved NAS mount identity, read/write access as `PUID:PGID`, and the resolved Compose mounts. It creates and removes small temporary files in the storage roots. It does not need running containers. Fix every `FAIL` before starting the services.
+
+### 4. Start the stack and verify the running containers
+
+```bash
+sudo docker compose --env-file /home/udms/.env \
+  -f /home/udms/docker-compose-udms.yml up -d
+sudo bash ./check_storage.sh --env-file /home/udms/.env --runtime
+```
+
+Run the second command once the application processes have started. If they are still starting, wait and rerun it.
+
+The runtime check inspects the actual bind mounts and application UID/GID. It verifies that a file created by Radarr is readable and writable by Bazarr, repeats that check for Sonarr, and tests download sharing between enabled download clients and Radarr/Sonarr. Probe files use unique names and are removed after the check.
+
+### 5. Configure the applications
+
+Set Radarr's root folder to `/data/movies`, Sonarr's to `/data/tv`, and download clients to `/data/downloads`. If both download clients are enabled, use separate subdirectories or categories under that download root. Connect Bazarr to Radarr and Sonarr. Matching container paths normally need no Bazarr path mapping.
+
+For an existing media file, check the exact file and subtitle directory too:
+
+```bash
+sudo bash ./check_storage.sh --env-file /home/udms/.env --runtime \
+  --sample '/data/movies/Moana (2016)/Moana 2016 720p BluRay DD5.1 x264-LoRD.mkv'
+```
+
+The sample check reads the file and creates/removes a probe in its parent directory. It does not modify the movie or existing subtitles. A successful storage check does not verify subtitle-provider credentials or connectivity; retry a subtitle search in Bazarr separately.
+
+## Check or migrate an existing server
+
+Do not rerun `init_udms.sh`. Preserve the current deployment and run these steps from your repository checkout.
+
+### 1. Inspect the active mounts and record the correct library paths
+
+```bash
+for service in bazarr radarr sonarr qbittorrent; do
+  sudo docker inspect "$service" --format \
+    '{{.Name}}{{range .Mounts}}{{println}}{{.Source}} -> {{.Destination}}{{end}}'
+done
+```
+
+Find the real library on the host, such as `/mnt/nas/FamilyShare/Movies`. A directory that merely exists may be an empty fallback created while the NAS was unmounted. Check its `findmnt` source and confirm it contains the expected media.
+
+### 2. Save the shared paths in the existing environment file
+
+```bash
+sudo bash ./configure_storage.sh --env-file /home/udms/.env
+```
+
+Enter the actual paths, not an empty default directory. Select NAS/local separately for each root. Existing unrelated `.env` values are preserved. The script does not infer library paths from a running container, so review all three prompts.
+
+### 3. Update the deployed Compose files
+
+The deployed Bazarr, Radarr, Sonarr, and download-client files must use this repository's shared-variable mounts. Compare any server-specific Compose settings before replacing files. Changing `.env` alone cannot fix a Compose file with a hardcoded source path.
+
+If the deployment already uses repository symlinks, the edited templates are used automatically. If it uses copies, merge the template changes while retaining server-specific settings. `sync_compose_links.sh` replaces deployed files with links to this checkout, so use it only after preserving and merging custom settings:
+
+```bash
+bash ./sync_compose_links.sh
+```
+
+Then run the preflight check:
+
+```bash
+sudo bash ./check_storage.sh --env-file /home/udms/.env
+```
+
+### 4. Recreate the affected services and run the runtime check
+
+For the default pipeline:
+
+```bash
+sudo docker compose --env-file /home/udms/.env \
+  -f /home/udms/docker-compose-udms.yml up -d --no-deps \
+  bazarr radarr sonarr qbittorrent
+sudo bash ./check_storage.sh --env-file /home/udms/.env --runtime
+```
+
+Include `sabnzbd` if you enabled it. Recreate other affected services, such as Jellyfin, Lidarr, Readarr, Prowlarr, and FileBrowser, if their media/download sources changed. A plain `restart` does not apply new mount sources or environment variables. Add `--pull never` to the `up` command if you want to retain locally available images.
+
+To investigate one file, repeat the `--runtime --sample` command above using its path inside Bazarr. Inspect any custom Bazarr path mappings if the storage check passes but Bazarr still reports a missing file.
+
+If a NAS is remounted after containers started, recreate the affected containers and rerun the checks. Container health alone does not prove that the media share is visible. These checks run on demand; they do not monitor later NAS disconnects.
+
+## Storage script reference
+
+| Command | Purpose |
+|---|---|
+| `configure_storage.sh --env-file PATH` | Prompt for paths and identity; back up and update `.env` |
+| `check_storage.sh --env-file PATH` | Check mount identity, host access, and Compose configuration |
+| `check_storage.sh --env-file PATH --runtime` | Also test actual containers and shared file visibility |
+| `check_storage.sh --env-file PATH --runtime --sample PATH` | Also test an existing file and its subtitle directory |
+| `setup_storage_dir.sh --env-file PATH` | Compatibility entry point for `configure_storage.sh` |
+
+The checker accepts `--compose-file PATH` for a nonstandard Compose filename. Configuration accepts `--movies`, `--tv`, `--downloads`, `--puid`, `--pgid`, `--storage-type local` or `--storage-type nas`, `--create-local`, and `--non-interactive`. Use interactive mode when local and NAS directories are mixed. Run a script with `--help` for details. Paths must be absolute. Runtime checks require a local Docker Engine on the machine that owns the storage paths.
+
+The checked LinuxServer services use `UMASK: "002"`. Umask affects newly created files; it does not repair old ownership or override NAS ACLs/CIFS mount modes. On permission failure, inspect the actual host file and its parent directories, the mount identity, and NAS-side write access. Keep `PUID`/`PGID` consistent and fix the specific cause before changing library permissions.
+
+Run the storage regression checks from the repository root with:
+
+```bash
+python3 -m unittest discover -s tests -v
 ```
 
 ---

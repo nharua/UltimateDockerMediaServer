@@ -1,6 +1,10 @@
 # Environment and sensitive files
 .env
 *.env
+.env.backup-*
+*.env.backup-*
+.udms-env-*
+__pycache__/
 
 # Logs and diagnostic reports
 logs.report

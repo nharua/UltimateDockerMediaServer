@@ -14,7 +14,11 @@ services:
       - "$LIDARR_PORT:8686"
     volumes:
       - $DOCKERDIR/appdata/lidarr:/config
-      - $DATADIR/downloads:/data/downloads
+      - type: bind
+        source: ${DOWNLOADS_DIR:?Run configure_storage.sh first}
+        target: /data/downloads
+        bind:
+          create_host_path: false
       - $DATADIR/media/music:/data/music
       - "/etc/localtime:/etc/localtime:ro"
     environment:

@@ -1,10 +1,25 @@
 #!/usr/bin/env bash
 set -e
 
+if [ "$(id -u)" -eq 0 ]; then
+  echo "Run init_udms.sh as the intended login user, without sudo. It requests sudo when needed." >&2
+  exit 1
+fi
+
 # Prompt user for input
 read -rp "Enter DOCKERDIR path (e.g., /home/docker): " DOCKERDIR
 read -rp "Enter DATADIR path (e.g., /home/storage): " DATADIR
 read -rp "Enter HOSTNAME (e.g., udms): " HOSTNAME
+
+# Initialization is for new deployments. Storage updates preserve the existing .env.
+if [[ "$DOCKERDIR" != /* || "$DATADIR" != /* || ! "$HOSTNAME" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+  echo "Use absolute DOCKERDIR/DATADIR paths and an alphanumeric HOSTNAME." >&2
+  exit 1
+fi
+if sudo test -e "$DOCKERDIR/.env"; then
+  echo "Existing .env found. Use configure_storage.sh --env-file $DOCKERDIR/.env instead." >&2
+  exit 1
+fi
 
 # Resolve user info
 USERID=$(id -u)
@@ -12,6 +27,14 @@ GROUPID=$(id -g)
 USERNAME=$(id -un)
 USERDIR=$HOME
 TZ="Asia/Ho_Chi_Minh"
+
+# Compose dotenv syntax cannot safely represent these characters in this base template.
+python3 - "$DOCKERDIR" "$DATADIR" <<'PYVALIDATE'
+import sys
+for value in sys.argv[1:]:
+    if any(ord(c) < 32 or c in '\\"$`' for c in value):
+        sys.exit('Base directory paths cannot contain control characters, backslashes, quotes, dollar signs, or backticks.')
+PYVALIDATE
 
 # Check RAM
 TOTAL_RAM_GB=$(awk '/MemTotal/ {printf "%.0f", $2/1024/1024}' /proc/meminfo)
@@ -46,33 +69,8 @@ echo -e "\n📝 Creating empty docker-gc-exclude file at $DOCKERDIR/appdata/dock
 sudo touch "$DOCKERDIR/appdata/docker-gc/docker-gc-exclude"
 sudo chown "$USERID:$GROUPID" "$DOCKERDIR/appdata/docker-gc/docker-gc-exclude"
 
-echo -e "\n📁 Creating data directories in DATADIR..."
-DATA_FOLDERS=(
-  "$DATADIR/media/books"
-  "$DATADIR/media/movies"
-  "$DATADIR/media/music"
-  "$DATADIR/media/m_music"
-  "$DATADIR/media/tv"
-  "$DATADIR/media/pictures"
-  "$DATADIR/downloads"
-)
-
-for folder in "${DATA_FOLDERS[@]}"; do
-  if [ -d "$folder" ]; then
-    echo "✅ Already exists: $folder"
-  else
-    sudo mkdir -p "$folder"
-    sudo chown "$USERID:$GROUPID" "$folder"
-    echo "📁 Created: $folder"
-  fi
-done
-
-echo -e "\n🔐 Setting ACL permissions for $DATADIR ..."
-sudo chmod 775 "$DATADIR"
-sudo setfacl -Rdm u:$USERNAME:rwx "$DATADIR"
-sudo setfacl -Rm u:$USERNAME:rwx "$DATADIR"
-sudo setfacl -Rdm g:docker:rwx "$DATADIR"
-sudo setfacl -Rm g:docker:rwx "$DATADIR"
+# Media directories and permissions are configured separately by configure_storage.sh.
+# Do not create default media directories or recursively change NAS ACLs here.
 
 echo -e "\n🔐 Setting ACL permissions for $DOCKERDIR ..."
 sudo chmod 775 "$DOCKERDIR"
@@ -184,7 +182,7 @@ EOF
 
 # Special permissions for secrets and .env
 sudo chown root:root "$DOCKERDIR/secrets"
-sudo chmod 600 "$DOCKERDIR/secrets"
+sudo chmod 700 "$DOCKERDIR/secrets"
 sudo chown root:root "$DOCKERDIR/.env"
 sudo chmod 600 "$DOCKERDIR/.env"
 
@@ -207,5 +205,6 @@ else
   echo "⚠️ Directory ./compose not found!"
 fi
 
-echo -e "\n✅ Completed!"
+echo -e "\nInitialization completed. Configure the media paths next:"
+echo "sudo bash ./configure_storage.sh --env-file \"$DOCKERDIR/.env\""
 

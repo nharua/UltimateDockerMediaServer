@@ -15,7 +15,11 @@ services:
       - $DOCKERDIR/appdata/filebrowser:/config
       - $USERDIR:/data/home
       - $DATADIR/media:/data/media
-      - $DATADIR/downloads:/data/downloads
+      - type: bind
+        source: ${DOWNLOADS_DIR:?Run configure_storage.sh first}
+        target: /data/downloads
+        bind:
+          create_host_path: false
     environment:
       TZ: $TZ
       PUID: $PUID

@@ -13,9 +13,13 @@ services:
       - "8084:8080"
     volumes:
       - $DOCKERDIR/appdata/sabnzbd:/config
-      - $DATADIR/usenet:/data/downloads
+      - type: bind
+        source: ${DOWNLOADS_DIR:?Run configure_storage.sh first}
+        target: /data/downloads
+        bind:
+          create_host_path: false
     environment:
       PUID: $PUID
       PGID: $PGID
       TZ: $TZ
-      UMASK_SET: 002
+      UMASK: "002"

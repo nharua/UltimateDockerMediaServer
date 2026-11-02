@@ -130,3 +130,41 @@ Update the session log using the `update-sessions` skill after migrating from `P
 
 ### Notes
 - The earlier changes remain uncommitted. No files were staged and no commit was created.
+
+---
+
+## Session 3 - 2026-11-02
+
+### Task
+Prevent media mount mismatches on new deployments and document setup and diagnostics for existing servers.
+
+### What was done
+- Added `configure_storage.sh` and `check_storage.sh`, backed by `scripts/storage.py`, to configure shared Movies/TV/Downloads paths and verify host and container access.
+- Preserved unrelated `.env` settings, added private backups and atomic updates, and parsed dotenv values through Compose without executing them in a shell.
+- Added NAS mount identity checks, explicit creation of new local directories, application UID/GID and umask checks, shared-file probes, and an optional existing-media-file check.
+- Converted affected Compose mounts to shared path variables and `create_host_path: false`. Updated downloader umask variables to `UMASK: "002"`.
+- Changed initialization to refuse an existing `.env` and removed recursive media/NAS ACL changes. Replaced the old storage initializer with a compatibility entry point.
+- Documented the command sequence for new servers and existing deployments in `README.md`.
+- Passed 12 regression checks, including real Compose validation, missing or wrong NAS mounts, mismatched paths, dotenv literal handling, permission denial, umask mismatch, and probe cleanup. Shell syntax and whitespace checks passed.
+- Tested file sharing on `mydocker` between Radarr/Bazarr, Sonarr/Bazarr, and qBittorrent/Radarr/Sonarr. All shared-file probes passed and were removed.
+
+### Files modified
+- `configure_storage.sh`, `check_storage.sh`, `scripts/storage.py` - Storage configuration and diagnostics.
+- `tests/test_storage.py` - Storage and Compose regression checks.
+- `compose/bazarr.yml`, `compose/radarr.yml`, `compose/sonarr.yml` - Shared media/download paths.
+- `compose/qbittorrent.yml`, `compose/sabnzbd.yml` - Shared download paths and supported umask setting.
+- `compose/jellyfin.yml`, `compose/filebrowser.yml`, `compose/lidarr.yml`, `compose/readarr.yml`, `compose/prowlarr.yml` - Consistent library or download sources.
+- `init_udms.sh`, `setup_storage_dir.sh` - Separate initialization from storage configuration.
+- `.gitignore` - Exclude private environment backups and Python caches.
+- `README.md` - New-server setup, existing-server migration, and diagnostic commands.
+- `SESSIONS.md` - Record the work and remaining deployment steps.
+
+### TODO / Next Steps
+- [ ] Migrate `mydocker` to the shared path variables and run the full preflight/runtime commands using its deployed Compose files.
+- [ ] Recreate qBittorrent with the supported `UMASK: "002"` setting during migration. Its current application umask is `0022`.
+- [ ] Complete the remaining Moana provider search and Prowlarr/Bazarr+ checks from Session 1.
+
+### Notes
+- Existing deployments must configure `MOVIES_DIR`, `TV_DIR`, and `DOWNLOADS_DIR` before using the updated Compose templates.
+- The live checks used temporary files only. The new scripts and Compose settings have not been deployed to `mydocker`.
+- NAS checks run on demand and do not monitor later disconnections.

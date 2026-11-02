@@ -14,10 +14,18 @@ services:
       - $DOCKERDIR/appdata/radarr:/config
       
       # Movie library (where Radarr moves movies after download)
-      - $DATADIR/media/movies:/data/movies
+      - type: bind
+        source: ${MOVIES_DIR:?Run configure_storage.sh first}
+        target: /data/movies
+        bind:
+          create_host_path: false
       
       # Download folder from download clients (must match path in qBittorrent/SABnzbd)
-      - $DATADIR/downloads:/data/downloads
+      - type: bind
+        source: ${DOWNLOADS_DIR:?Run configure_storage.sh first}
+        target: /data/downloads
+        bind:
+          create_host_path: false
       
       # Option: sync host system timezone
       - /etc/localtime:/etc/localtime:ro

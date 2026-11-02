@@ -12,8 +12,16 @@ services:
       - "${SONARR_PORT}:8989"
     volumes:
       - $DOCKERDIR/appdata/sonarr:/config
-      - $DATADIR/media/tv:/data/tv
-      - $DATADIR/downloads:/data/downloads
+      - type: bind
+        source: ${TV_DIR:?Run configure_storage.sh first}
+        target: /data/tv
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${DOWNLOADS_DIR:?Run configure_storage.sh first}
+        target: /data/downloads
+        bind:
+          create_host_path: false
       - /etc/localtime:/etc/localtime:ro
     environment:
       TZ: $TZ

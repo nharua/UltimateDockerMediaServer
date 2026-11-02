@@ -22,6 +22,20 @@ services:
     volumes:
       - $DOCKERDIR/appdata/jellyfin:/config
       - $DATADIR/media:/data
-      - $DATADIR/downloads:/t_downloads
+      - type: bind
+        source: ${MOVIES_DIR:?Run configure_storage.sh first}
+        target: /data/movies
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${TV_DIR:?Run configure_storage.sh first}
+        target: /data/tv
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${DOWNLOADS_DIR:?Run configure_storage.sh first}
+        target: /t_downloads
+        bind:
+          create_host_path: false
       # - $DATADIR/usenet:/u_downloads
       - $TRANSCODE:/transcode
