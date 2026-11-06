@@ -30,6 +30,7 @@ include:
   # CORE
   - compose/$HOSTNAME/socket-proxy.yml
   - compose/$HOSTNAME/portainer.yml
+  - compose/$HOSTNAME/dockhand.yml
   - compose/$HOSTNAME/dozzle.yml
   - compose/$HOSTNAME/homepage.yml
   # INDEXERS

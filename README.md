@@ -334,6 +334,7 @@ After deployment, you can access your media server and management interfaces usi
 - **Homepage Dashboard**: [http://localhost:3000](http://localhost:3000)
 - **Jellyfin**: [http://localhost:8096](http://localhost:8096)
 - **Portainer**: [http://localhost:9000](http://localhost:9000)
+- **Dockhand**: [http://localhost:3300](http://localhost:3300)
 - **Dozzle**: [http://localhost:9999](http://localhost:9999)
 - **qBittorrent Web UI**: [http://localhost:8081](http://localhost:8081)
 - **Prowlarr**: [http://localhost:9696](http://localhost:9696)
