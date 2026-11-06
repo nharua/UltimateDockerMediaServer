@@ -49,19 +49,19 @@
 
 ## 📁 Key Project Files
 
-| File | Status | Description |
-|---|---|---|
-| [`compose/bazarr.yml`](file:///home/rua/myWork/github/UltimateDockerMediaServer/compose/bazarr.yml) | Modified | Updated to Bazarr+ with hardening & healthcheck; added FlareSolverr service |
-| [`compose/radarr.yml`](file:///home/rua/myWork/github/UltimateDockerMediaServer/compose/radarr.yml) | Modified | Translated volume comments to English |
-| [`compose/filebrowser.yml`](file:///home/rua/myWork/github/UltimateDockerMediaServer/compose/filebrowser.yml) | Modified | Translated port comment and startup log to English |
-| [`compose/immich.yml`](file:///home/rua/myWork/github/UltimateDockerMediaServer/compose/immich.yml) | Modified | Translated profile comment to English |
-| [`init_udms.sh`](file:///home/rua/myWork/github/UltimateDockerMediaServer/init_udms.sh) | Modified | Added FlareSolverr variables; translated prompts, logs, and comments to English |
-| [`sync_compose_links.sh`](file:///home/rua/myWork/github/UltimateDockerMediaServer/sync_compose_links.sh) | Modified | Translated prompts, logs, and comments to English |
-| [`setup_storage_dir.sh`](file:///home/rua/myWork/github/UltimateDockerMediaServer/setup_storage_dir.sh) | Modified | Translated section comments and completion message to English |
-| [`README.md`](file:///home/rua/myWork/github/UltimateDockerMediaServer/README.md) | Modified | Updated stack documentation, ports, tips, and translated notes to English |
-| [`AGENTS.md`](file:///home/rua/myWork/github/UltimateDockerMediaServer/AGENTS.md) | Created | Agent behavioral rules and project session logging guidelines |
-| [`GEMINI.md`](file:///home/rua/myWork/github/UltimateDockerMediaServer/GEMINI.md) | Created | Symlink to `AGENTS.md` |
-| [`SESSIONS.md`](SESSIONS.md) | Updated | Project summary tracking architecture, recent changes, and next steps |
+| File                                                                                                          | Status   | Description                                                                     |
+| ------------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------- |
+| [`compose/bazarr.yml`](file:///home/rua/myWork/github/UltimateDockerMediaServer/compose/bazarr.yml)           | Modified | Updated to Bazarr+ with hardening & healthcheck; added FlareSolverr service     |
+| [`compose/radarr.yml`](file:///home/rua/myWork/github/UltimateDockerMediaServer/compose/radarr.yml)           | Modified | Translated volume comments to English                                           |
+| [`compose/filebrowser.yml`](file:///home/rua/myWork/github/UltimateDockerMediaServer/compose/filebrowser.yml) | Modified | Translated port comment and startup log to English                              |
+| [`compose/immich.yml`](file:///home/rua/myWork/github/UltimateDockerMediaServer/compose/immich.yml)           | Modified | Translated profile comment to English                                           |
+| [`init_udms.sh`](file:///home/rua/myWork/github/UltimateDockerMediaServer/init_udms.sh)                       | Modified | Added FlareSolverr variables; translated prompts, logs, and comments to English |
+| [`sync_compose_links.sh`](file:///home/rua/myWork/github/UltimateDockerMediaServer/sync_compose_links.sh)     | Modified | Translated prompts, logs, and comments to English                               |
+| [`setup_storage_dir.sh`](file:///home/rua/myWork/github/UltimateDockerMediaServer/setup_storage_dir.sh)       | Modified | Translated section comments and completion message to English                   |
+| [`README.md`](file:///home/rua/myWork/github/UltimateDockerMediaServer/README.md)                             | Modified | Updated stack documentation, ports, tips, and translated notes to English       |
+| [`AGENTS.md`](file:///home/rua/myWork/github/UltimateDockerMediaServer/AGENTS.md)                             | Created  | Agent behavioral rules and project session logging guidelines                   |
+| [`GEMINI.md`](file:///home/rua/myWork/github/UltimateDockerMediaServer/GEMINI.md)                             | Created  | Symlink to `AGENTS.md`                                                          |
+| [`SESSIONS.md`](SESSIONS.md)                                                                                  | Updated  | Project summary tracking architecture, recent changes, and next steps           |
 
 ---
 
