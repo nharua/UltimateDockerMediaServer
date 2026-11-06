@@ -195,3 +195,33 @@ Separate FlareSolverr from the Bazarr Compose definition and load it from the ro
 ### Notes
 - Image, ports, network address, environment, healthcheck, and security settings remain unchanged.
 - The file split has not been applied to the running server.
+
+---
+
+## Session 5 - 2026-11-05
+
+### Task
+Stage and commit updates to the Immich Docker Compose configuration.
+
+### What was done
+- Staged and committed changes in `compose/immich.yml` with Conventional Commits format (`refactor(immich)`).
+- Updated PostgreSQL database image from `tensorchord/pgvecto-rs:pg14-v0.2.0` to official `ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0`.
+- Enabled `vchord.so` in `shared_preload_libraries` alongside `vectors.so` and configured `shm_size: 128mb` for `immich-db`.
+- Configured `IMMICH_MACHINE_LEARNING_URL` to point to `http://immich-ml:3003`.
+- Updated Immich upload storage volume mount from `$DATADIR/media/pictures` to `$DATADIR/Immich`.
+- Validated YAML syntax and ran test suite (`tests/test_storage.py`), passing all 12 tests.
+
+### Files modified
+- `compose/immich.yml` - Updated database image, shared memory, preload libraries, machine learning URL, and upload directory.
+- `SESSIONS.md` - Recorded Session 5 summary and next steps.
+
+### TODO / Next Steps
+- [ ] Deploy updated `compose/immich.yml` on `mydocker` and verify database migration to VectorChord.
+- [ ] Deploy or link `compose/flaresolverr.yml` on `mydocker` when migrating the Compose templates.
+- [ ] Migrate `mydocker` to the shared path variables and run the full preflight/runtime commands using its deployed Compose files.
+- [ ] Recreate qBittorrent with the supported `UMASK: "002"` setting during migration.
+- [ ] Complete the remaining Moana provider search and Prowlarr/Bazarr+ checks from Session 1.
+
+### Notes
+- The database update uses VectorChord (`vchord.so`), which replaces legacy pgvecto-rs indexing for Immich.
+- Changes are committed locally (`1187cdf`) on branch `main` and not yet pushed upstream or deployed to `mydocker`.
