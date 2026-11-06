@@ -225,3 +225,44 @@ Stage and commit updates to the Immich Docker Compose configuration.
 ### Notes
 - The database update uses VectorChord (`vchord.so`), which replaces legacy pgvecto-rs indexing for Immich.
 - Changes are committed locally (`1187cdf`) on branch `main` and not yet pushed upstream or deployed to `mydocker`.
+
+---
+
+## Session 6 - 2026-11-06
+
+### Task
+Nghiên cứu kiến trúc cơ sở dữ liệu của Dockhand (with/without SQL database cho môi trường gia đình), tạo file Docker Compose cho Dockhand dựa trên cấu hình Portainer, khắc phục lỗi ánh xạ cổng Web UI và hướng dẫn kết nối Docker environment.
+
+### What was done
+- Phân tích cơ chế lưu trữ của Dockhand: xác nhận SQLite nhúng (mặc định) là giải pháp tối ưu cho homelab nhờ tiết kiệm tài nguyên, độc lập không phụ thuộc DB ngoài và sao lưu đơn giản; PostgreSQL chỉ cần thiết khi cần cụm HA hoặc môi trường nhiều quản trị viên truy cập đồng thời.
+- Tạo mới file cấu hình `compose/dockhand.yml` theo chuẩn UDMS và `compose/portainer.yml`: gắn mạng nội bộ `socket_proxy`, kết nối daemon qua `DOCKER_HOST=tcp://socket-proxy:2375`, lưu trữ cấu hình tại `$DOCKERDIR/appdata/dockhand/data:/app/data` và bật `security_opt: [no-new-privileges:true]`.
+- Chẩn đoán và khắc phục sự cố Web UI không phản hồi tại `http://192.168.100.80:3300/`: sửa lỗi ánh xạ cổng từ container port 3300 về đúng container port 3000 (`${DOCKHAND_PORT:-3300}:3000`) và thêm fallback IP `${DOCKHAND_SOCKET_IP:-192.168.91.250}`.
+- Hướng dẫn thiết lập ban đầu trên giao diện Dockhand: chọn loại kết nối `Direct connection` để trỏ tới `socket-proxy:2375` (không dùng TLS) và kích hoạt xác thực quản trị (Authentication).
+- Cập nhật tài liệu quy tắc workflow trong `AGENTS.md` (chuỗi checkpoint, chính sách ngôn ngữ và chính sách bảo mật).
+- Thực hiện commit các thay đổi theo chuẩn Conventional Commits.
+
+### Files modified
+- `compose/dockhand.yml` - Tạo mới cấu hình service Dockhand kết nối qua socket-proxy với fallback port/IP.
+- `docker-compose-udms.yml` - Bổ sung include service Dockhand trong nhóm CORE.
+- `init_udms.sh` - Bổ sung biến môi trường `DOCKHAND_PORT` và `DOCKHAND_SOCKET_IP` vào mẫu `.env`.
+- `README.md` - Thêm Dockhand vào danh sách URL truy cập dịch vụ.
+- `AGENTS.md` - Cập nhật quy tắc checkpoint, chính sách ngôn ngữ và chính sách bảo mật.
+- `SESSIONS.md` - Ghi nhận nhật ký phiên làm việc Session 6.
+
+### Git checkpoint
+- `563f464` (`feat(compose): add Dockhand service compose configuration`)
+- `1fdb8bd` (`feat(compose): integrate Dockhand into root compose and environment template`)
+
+### TODO / Next Steps
+- [x] Hoàn tất tạo tài khoản Admin và kích hoạt tính năng Authentication trong Dockhand Web UI (`Settings > Authentication`).
+- [x] Bổ sung khai báo `DOCKHAND_PORT` và `DOCKHAND_SOCKET_IP` vào script khởi tạo `init_udms.sh` và mẫu `.env`.
+- [x] Thêm service Dockhand vào danh sách `include:` của `docker-compose-udms.yml` và chạy `sync_compose_links.sh` trên server khi triển khai chính thức.
+- [ ] Triển khai bản cập nhật `compose/immich.yml` trên `mydocker` và kiểm tra migration sang VectorChord.
+- [ ] Triển khai hoặc tạo symlink `compose/flaresolverr.yml` trên `mydocker` khi đồng bộ template Compose.
+- [ ] Chuyển đổi `mydocker` sang các biến đường dẫn dùng chung và chạy toàn bộ kiểm tra preflight/runtime.
+- [ ] Tái tạo qBittorrent với cấu hình `UMASK: "002"` trên server.
+- [ ] Hoàn thành kiểm tra tìm kiếm phụ đề Moana trong Bazarr và kiểm tra Prowlarr/Bazarr+ từ Session 1.
+
+### Notes
+- Ứng dụng Dockhand bên trong container luôn lắng nghe tại cổng `3000`. Khi đổi port truy cập trên host cần giữ nguyên port đích trong container là `:3000`.
+- Trên giao diện Dockhand, tùy chọn kết nối TCP/socket-proxy tương ứng với loại kết nối `Direct connection`.
