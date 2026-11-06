@@ -1,0 +1,21 @@
+services:
+  # Dockhand - Modern Docker Management WebUI
+  dockhand:
+    container_name: dockhand
+    image: fnsys/dockhand:latest
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    # profiles: ["core", "all"]
+    networks:
+      socket_proxy:
+        ipv4_address: ${DOCKHAND_SOCKET_IP:-192.168.91.250}
+    ports:
+      - "${DOCKHAND_PORT:-3300}:3000"
+    volumes:
+      # - /var/run/docker.sock:/var/run/docker.sock # Alternative: direct socket mount if not using socket-proxy
+      - $DOCKERDIR/appdata/dockhand/data:/app/data # Embedded SQLite DB & config storage
+    environment:
+      - TZ=$TZ
+      - DOCKER_HOST=tcp://socket-proxy:2375 # Connect via Docker Socket Proxy
+
